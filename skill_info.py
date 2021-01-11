@@ -27,7 +27,7 @@ def main():
 	options = Options()
 	options.headless = True
 
-	DRIVER_PATH = r'C:/Program Files (x86)/Google/Chrome/Application/chromedriver.exe'
+	DRIVER_PATH = r'C:/Program Files (x86)/Google/Chrome/Application/chromedriver.exe' # path to chrome driver
 	driver = webdriver.Chrome(options=options, executable_path=DRIVER_PATH)
 	page_URL = "https://www.amazon.com/gp/product/B08NR9YN13?ref=skillrw_dsk_editorspicks__0" 
 	skill_text = skill_info(page_URL, driver)
