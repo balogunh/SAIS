@@ -34,6 +34,11 @@ def main():
 	
 	print(skill_text)
 
+# TODO : Update program with changes from Hatebase API
+# TODO : Authenticate
+# TODO : Analysis
+# TODO : Handle result
+
 
 if __name__ == '__main__':
 	main()
