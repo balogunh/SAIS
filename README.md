@@ -11,7 +11,8 @@ Selenium with Python
 
 pip install selenium
 
-
+### Acknowledgements
+* [HATEBASE](https://hatebase.org/)
 
 
 
