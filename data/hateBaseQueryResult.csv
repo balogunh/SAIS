@@ -1,0 +1,14 @@
+,complete,result,term,other_terms,hateful_meaning,nonhateful_meaning,average_offensiveness,language,probability,explanation
+0,true,false,,,,,,,0,Unable to find any known terms in post.
+1,true,false,,,,,,,0,Unable to find any known terms in post.
+2,true,false,,,,,,,0,"Unable to find any known terms in post, although the following possible pilotfish were found: crazy; hell"
+3,true,false,,,,,,,0,Unable to find any known terms in post.
+4,true,false,,,,,,,0,Unable to find any known terms in post.
+5,true,false,,,,,,,0,Unable to find any known terms in post.
+6,true,false,,,,,,,0,Unable to find any known terms in post.
+7,true,false,,,,,,,0,Unable to find any known terms in post.
+8,true,false,,,,,,,0,"Unable to find any known terms in post, although the following possible pilotfish were found: hate"
+9,true,false,becky,,A white woman,A common woman's name,,eng,0,"Post contains the term &quot;becky&quot;, which has a high likelihood of multiple meanings. The term &quot;Becky&quot; is ambiguous and thus disabled from automated search because of the risk of too many false positives. To enable search regardless, specify the broadest possible search."
+10,true,false,,,,,,,0,Unable to find any known terms in post.
+11,true,false,,,,,,,0,Unable to find any known terms in post.
+12,true,false,ho,,"[1] A woman, from 'whore'. [2] A prostitute.",,86,eng,0,"Post contains the term &quot;ho&quot;, which has a high likelihood of multiple meanings. The term &quot;ho&quot; is ambiguous and thus disabled from automated search because of the risk of too many false positives. To enable search regardless, specify the broadest possible search."

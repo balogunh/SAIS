@@ -4,18 +4,10 @@ import requests
 import json
 import pandas as pd
 import time
+from collections import OrderedDict
 
-
-def skill_info(skill_URL, web_driver):
-    """ Function fetches skill description from a given skill URL
-
-    Arg: 
-            skill_URL (str) : The URL of the skill of interest
-            driver (webdriver) : The webdriver object for page retrieval
-
-
-    Return: 
-            text containing description of input URL/skill
+def skillDesc(skill_URL, web_driver):
+    """ Function returns text containing description of input URL skill
     """
     web_driver.get(skill_URL)
     description = web_driver.find_element_by_id('a2s-description')
@@ -45,18 +37,31 @@ def getAnalysisResponse(payload, get_analysis_endpoint):
     result = response.json()["result"]
     return(result)
 
+def dataPreprocessing(path_to_data, driver):
+	""" Function returns dict of skill name and description """
+	result_dict = {}
+	df = pd.read_csv(path_to_data, usecols=[0,1], header=0)
+	dict_Skills = dict(df.values.tolist())
+	for key,value in dict_Skills.items():
+		page_URL = value
+		skill_text = skillDesc(page_URL, driver)
+		result_dict[key] = skill_text
+	return result_dict
+
 
 def main():
     # Set up the webdriver for crawling text from a skill url
     options = Options()
     options.headless = True
-    # path to chrome driver
-    DRIVER_PATH = r'C:/Program Files (x86)/Google/Chrome/Application/chromedriver.exe'
+    # Replace path to chrome driver with your chromediver path
+    DRIVER_PATH = 'chromedriver/path'
     driver = webdriver.Chrome(options=options, executable_path=DRIVER_PATH)
-    # replace "AMAZON SKILL URL" with url to interested skill
-    page_URL = "AMAZON SKILL URL"
-    skill_text = skill_info(page_URL, driver)
-    print('SKILL DESCRIPTION \n {}'.format(skill_text))
+
+    #Generate for skill and descriptions csv from url csv file
+    path_to_data = "data/inputData.csv"
+    desc_dict = dataPreprocessing(path_to_data, driver)
+    pd_result = pd.DataFrame.from_dict(data=desc_dict, orient='index', columns=['Skill Description'])
+    pd_result.to_csv('data/skillDescription.csv')
 
     # Authenticate to the HateBase API and obtain a token (one hour expiration period)
     auth_url = "https://api.hatebase.org/4-4/authenticate"
@@ -71,27 +76,55 @@ def main():
     # Initialize payload (request) format, language, country, and search option
     text_format = 'json'
     lang = 'ENG'
-    country = 'UK'
+    country = 'GB'
     search_option = 'false'
-    # Create analysis payload for /analyze endpoint
-    analysis_payload = {'token': auth_token,
-                        'format': text_format,
-                        'content': skill_text,
-                        'language': lang,
-                        'country': country,
-                        'broadest_possible_search': search_option}
-    analysis_id = analyseSkill(analysis_payload, analysis_url)
-    print('\n ANALYSIS REQUEST ID \n {}'.format(analysis_id))
+    analysis_id_list = []
 
-    # Get result of analysis using id output from analyze request
-    get_analysis_url = "https://api.hatebase.org/4-4/get_analysis"
-    get_payload = {'token': auth_token,
+    # Create analysis payloads for /analyze endpoint
+    desc_dict = OrderedDict(desc_dict)
+    for skill_text in desc_dict.values():
+
+	    analysis_payload = {'token': auth_token,
+	                        'format': text_format,
+	                        'content': skill_text,
+	                        'language': lang,
+	                        'country': country,
+	                        'broadest_possible_search': search_option}
+	    analysis_id = analyseSkill(analysis_payload, analysis_url)
+	    analysis_id_list.append(analysis_id)
+	    # print('\n ANALYSIS REQUEST ID \n {}'.format(analysis_id))
+    print('\n ANALYSIS REQUEST ID LIST \n {}'.format(analysis_id_list))
+
+    # Get result of analysis using id output (analysis_id_list) from analyze requests
+    res_analysis_url = "https://api.hatebase.org/4-4/get_analysis"
+    res_payload = {'token': auth_token,
                    'format': text_format,
-                   'request_id': analysis_id}
-    # wait 60 seconds for analysis result before querying HateBase for result
-    time.sleep(60)
-    analysis_result = getAnalysisResponse(get_payload, get_analysis_url)
+                   'request_id': analysis_id_list[0]}
+    # # wait for sometime for HateBase API to generate result seconds for analysis result before querying HateBase for result
+    time.sleep(120)
+    analysis_result = getAnalysisResponse(res_payload, res_analysis_url)
     print('\n ANALYSIS RESULT \n {}'.format(analysis_result))
+    # Create initial dataframe from first result
+    res_df = pd.DataFrame(data=analysis_result, index=[0])
+
+    # Append results of other queries to dataframe
+    for query_id in range(1, len(analysis_id_list)):
+    	res_payload = {'token': auth_token,
+                   'format': text_format,
+                   'request_id': analysis_id_list[query_id]}
+    	analysis_result = getAnalysisResponse(res_payload, res_analysis_url)
+    	res_df =res_df.append(analysis_result, ignore_index=True)
+
+    res_df.reset_index(drop=True, inplace=True)
+    res_df.to_csv("data/hateBaseQueryResult.csv")
+
+
+    #TODO:
+    #		automated url scraping for all skills
+    #		Write data to csv
+    #		run query against scraped skills
+
+
 
 
 if __name__ == '__main__':
